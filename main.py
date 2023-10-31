@@ -3,21 +3,23 @@ from app import app as Application
 
 app = Application()
 
+
 def add(host: str, service_type: str, feedback: int):
     app.add(host, service_type, feedback)
 
 
-def remove(num_host : int):
+def remove(num_host: int):
     app.remove(num_host)
 
 
-def check(num_host : int):
-    host, result= app.check(num_host)
+def check(num_host: int):
+    host, result = app.check(num_host)
     print(host, "is worked!" if result else "isn't worked!")
+
 
 def listofhosts():
     for i, item in enumerate(app.get_list()):
-        print("["+ str(i) + "]", item.type_host, "\t:", item.source)
+        print("[" + str(i) + "]", item.type_host, "\t:", item.source)
 
 
 parser = argparse.ArgumentParser(
@@ -40,11 +42,11 @@ args = parser.parse_args()
 
 debug = False
 errors = False
-if args.add != None and args.type != None and args.feedback != None and args.remove != True and args.check == None and args.list != True and args.errors != True and args.verbose != True:
+if args.add is not None and args.type is not None and args.feedback is not None and args.remove != True and args.check is None and args.list != True and args.errors != True and args.verbose != True:
     add(args.add, args.type, args.feedback)
-elif args.remove != None  and args.add == None and args.check == None and args.list != True and args.type == None and args.feedback == None and args.errors != True and args.verbose != True:
+elif args.remove is not None and args.add is None and args.check is None and args.list != True and args.type is None and args.feedback == None and args.errors != True and args.verbose != True:
     remove(args.remove)
-elif args.check != None  and args.remove == None and args.add == None and args.list != True and args.type == None and args.feedback == None and args.errors != True and args.verbose != True:
+elif args.check != None and args.remove == None and args.add == None and args.list != True and args.type == None and args.feedback == None and args.errors != True and args.verbose != True:
     check(args.check)
 elif args.list == True and args.remove == None and args.check == None and args.add == None and args.type == None and args.feedback == None and args.errors != True and args.verbose != True:
     listofhosts()

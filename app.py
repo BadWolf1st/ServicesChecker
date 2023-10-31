@@ -11,12 +11,12 @@ class conf:
 
     def __init_services__(self):
         self._config = configparser.ConfigParser()
-        if not os.path.exists(self._services_path+'/services.ini'):
+        if not os.path.exists(self._services_path + '/services.ini'):
             self._save_services()
-        self._config.read(self._services_path+'/services.ini')
+        self._config.read(self._services_path + '/services.ini')
 
     def _save_services(self):
-        with open(self._services_path+"/services.ini", "w") as config_file:
+        with open(self._services_path + "/services.ini", "w") as config_file:
             self._config.write(config_file)
 
     def save_service(self, host: str, type_host: str, feedback: int):
@@ -31,7 +31,9 @@ class conf:
         self._save_services()
 
     def get_full_services_information(self) -> list:
-        return [item(source=host, typeOfSource=self._config.get(section=host, option='type'), rightAnswer=int(self._config.get(section=host, option='feedback'))) for host in self._config.sections()]
+        return [item(source=host, typeOfSource=self._config.get(section=host, option='type'),
+                     rightAnswer=int(self._config.get(section=host, option='feedback'))) for host in
+                self._config.sections()]
 
 
 class item:
@@ -43,6 +45,7 @@ class item:
 
 class aitem(item):
     def __init__(self, source: str, typeOfSource: str, rightAnswer, newAnswer):
+        super().__init__(source, typeOfSource, rightAnswer)
         self.source = source
         self.type_host = typeOfSource
         self.answer = rightAnswer
@@ -52,6 +55,7 @@ class aitem(item):
 class app:
 
     def __init__(self):
+        self.showErrors = None
         self._services = conf('./')
         self.debug = False
         self._workList = self._services.get_full_services_information()
@@ -82,8 +86,9 @@ class app:
 
     def check(self, num_host: int):
         item_host = self._workList[num_host]
-        return item_host.source, True if (item_host.type_host == 'site' and self.checkURL(item_host.source)==item_host.answer) or (item_host.type_host != 'site' and self.checkServer(item_host.source)==item_host.answer) else False
-
+        return item_host.source, True if (item_host.type_host == 'site' and self.checkURL(
+            item_host.source) == item_host.answer) or (item_host.type_host != 'site' and self.checkServer(
+            item_host.source) == item_host.answer) else False
 
     def checkServer(self, source: str) -> int:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -92,23 +97,23 @@ class app:
             if self.debug:
                 print(newSource[0], newSource[1])
             # port like INT!!!
-            s.connect((newSource[0], __convertStr__(newSource[1])))
+            s.connect((newSource[0], self.__convertStr__()))
             s.shutdown(socket.SHUT_RDWR)
             if self.debug:
                 print(1)
+            s.close()
             return 1
         except:
             if self.debug:
                 print(0)
-            return 0
-        finally:
             s.close()
+            return 0
 
     def checkURL(self, url: str) -> int:
         try:
             link = "https://" + url
             r = requests.head(link)
-            if (self.debug == True):
+            if self.debug:
                 print(url, ":", r.status_code)
             return r.status_code
         except requests.ConnectionError:
@@ -126,16 +131,16 @@ class app:
         for i in somelist:
             if self.debug:
                 print(i.answer, i.newAnswer)
-            if (i.answer != i.newAnswer):
+            if i.answer != i.newAnswer:
                 answer.append(i)
         return answer
 
     def run(self):
-        if (self._workList == []):
+        if not self._workList:
             return
         done = self.works()
         wrong = self.notValid(done)
-        if (wrong != []):
+        if wrong:
             print("Have", len(wrong), "problems!")
             if self.showErrors:
                 print('Problems:')
